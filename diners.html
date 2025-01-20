@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor d'Ingressos i Despeses</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        header {
+            background-color: #6200ea;
+            color: #fff;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: #fff;
+            padding: 1rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            text-align: center;
+            color: #6200ea;
+        }
+
+        form {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        form input, form select, form button {
+            padding: 0.5rem;
+            font-size: 1rem;
+        }
+
+        form input, form select {
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.5rem;
+        }
+
+        th {
+            background-color: #6200ea;
+            color: white;
+        }
+
+        .summary {
+            font-weight: bold;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Gestor d'Ingressos i Despeses</h1>
+    </header>
+    <div class="container">
+        <h2>Afegeix un moviment</h2>
+        <form id="transactionForm">
+            <input type="text" id="description" placeholder="Descripció" required>
+            <input type="number" id="amount" placeholder="Quantitat" required>
+            <select id="type" required>
+                <option value="income">Ingressos</option>
+                <option value="expense">Despeses</option>
+            </select>
+            <button type="submit">Afegeix</button>
+        </form>
+
+        <h2>Moviments</h2>
+        <table id="transactionTable">
+            <thead>
+                <tr>
+                    <th>Descripció</th>
+                    <th>Quantitat</th>
+                    <th>Tipus</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div class="summary" id="summary">Balanç Mensual: 0 €</div>
+    </div>
+
+    <script>
+        const form = document.getElementById('transactionForm');
+        const tableBody = document.querySelector('#transactionTable tbody');
+        const summary = document.getElementById('summary');
+
+        // Recupera les dades del localStorage
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
+        // Actualitza la taula i el balanç inicial
+        function updateUI() {
+            tableBody.innerHTML = '';
+            let total = 0;
+
+            transactions.forEach(transaction => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${transaction.description}</td>
+                    <td>${transaction.amount.toFixed(2)} €</td>
+                    <td>${transaction.type === 'income' ? 'Ingressos' : 'Despeses'}</td>
+                `;
+                tableBody.appendChild(row);
+
+                total += transaction.type === 'income' ? transaction.amount : -transaction.amount;
+            });
+
+            summary.textContent = `Balanç Mensual: ${total.toFixed(2)} €`;
+        }
+
+        // Guarda les transaccions al localStorage
+        function saveTransactions() {
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+        }
+
+        // Afegeix una nova transacció
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const description = document.getElementById('description').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const type = document.getElementById('type').value;
+
+            transactions.push({ description, amount, type });
+
+            saveTransactions();
+            updateUI();
+
+            form.reset();
+        });
+
+        // Inicialitza la interfície
+        updateUI();
+    </script>
+</body>
+</html>
