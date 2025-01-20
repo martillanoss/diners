@@ -4,76 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestor d'Ingressos i Despeses</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-        }
-
-        header {
-            background-color: #6200ea;
-            color: #fff;
-            text-align: center;
-            padding: 1rem;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 2rem auto;
-            background: #fff;
-            padding: 1rem;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        h2 {
-            text-align: center;
-            color: #6200ea;
-        }
-
-        form {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
-        }
-
-        form input, form select, form button {
-            padding: 0.5rem;
-            font-size: 1rem;
-        }
-
-        form input, form select {
-            flex: 1;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 1rem;
-        }
-
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-
-        th, td {
-            text-align: left;
-            padding: 0.5rem;
-        }
-
-        th {
-            background-color: #6200ea;
-            color: white;
-        }
-
-        .summary {
-            font-weight: bold;
-            text-align: right;
-        }
-    </style>
+    <link rel="stylesheet" href="diners.css">
 </head>
 <body>
     <header>
@@ -83,7 +14,8 @@
         <h2>Afegeix un moviment</h2>
         <form id="transactionForm">
             <input type="text" id="description" placeholder="Descripció" required>
-            <input type="number" id="amount" placeholder="Quantitat" required>
+            <input type="date" id="date" required>
+            <input type="number" id="amount" placeholder="Quantitat (ex: 12.34)" step="0.01" required>
             <select id="type" required>
                 <option value="income">Ingressos</option>
                 <option value="expense">Despeses</option>
@@ -95,6 +27,7 @@
         <table id="transactionTable">
             <thead>
                 <tr>
+                    <th>Data</th>
                     <th>Descripció</th>
                     <th>Quantitat</th>
                     <th>Tipus</th>
@@ -122,6 +55,7 @@
             transactions.forEach(transaction => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
+                    <td>${transaction.date}</td>
                     <td>${transaction.description}</td>
                     <td>${transaction.amount.toFixed(2)} €</td>
                     <td>${transaction.type === 'income' ? 'Ingressos' : 'Despeses'}</td>
@@ -144,10 +78,11 @@
             e.preventDefault();
 
             const description = document.getElementById('description').value;
+            const date = document.getElementById('date').value;
             const amount = parseFloat(document.getElementById('amount').value);
             const type = document.getElementById('type').value;
 
-            transactions.push({ description, amount, type });
+            transactions.push({ description, date, amount, type });
 
             saveTransactions();
             updateUI();
