@@ -37,15 +37,32 @@
         </table>
 
         <div class="summary" id="summary">Balanç Mensual: 0 €</div>
+
+        <button id="viewBalancePage">Consulta els balanços mensuals</button>
+    </div>
+
+    <div id="balancePage" class="hidden">
+        <header>
+            <h1>Balanços Mensuals</h1>
+        </header>
+        <div class="container">
+            <ul id="monthlyBalances"></ul>
+            <button id="backToMain">Torna</button>
+        </div>
     </div>
 
     <script>
         const form = document.getElementById('transactionForm');
         const tableBody = document.querySelector('#transactionTable tbody');
         const summary = document.getElementById('summary');
+        const viewBalancePage = document.getElementById('viewBalancePage');
+        const balancePage = document.getElementById('balancePage');
+        const monthlyBalances = document.getElementById('monthlyBalances');
+        const backToMain = document.getElementById('backToMain');
 
         // Recupera les dades del localStorage
         let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        let balances = JSON.parse(localStorage.getItem('balances')) || {};
 
         // Actualitza la taula i el balanç inicial
         function updateUI() {
@@ -68,9 +85,10 @@
             summary.textContent = `Balanç Mensual: ${total.toFixed(2)} €`;
         }
 
-        // Guarda les transaccions al localStorage
-        function saveTransactions() {
+        // Guarda les transaccions i balanços al localStorage
+        function saveData() {
             localStorage.setItem('transactions', JSON.stringify(transactions));
+            localStorage.setItem('balances', JSON.stringify(balances));
         }
 
         // Afegeix una nova transacció
@@ -84,10 +102,43 @@
 
             transactions.push({ description, date, amount, type });
 
-            saveTransactions();
+            saveData();
             updateUI();
 
             form.reset();
+        });
+
+        // Canvia a la pàgina de balanços mensuals
+        viewBalancePage.addEventListener('click', () => {
+            const currentDate = new Date();
+            const currentMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
+
+            // Calcula el balanç mensual actual
+            let monthlyTotal = 0;
+            transactions.forEach(transaction => {
+                if (transaction.date.startsWith(currentMonth)) {
+                    monthlyTotal += transaction.type === 'income' ? transaction.amount : -transaction.amount;
+                }
+            });
+            balances[currentMonth] = monthlyTotal;
+            saveData();
+
+            // Mostra els balanços mensuals
+            monthlyBalances.innerHTML = '';
+            for (const [month, balance] of Object.entries(balances)) {
+                const li = document.createElement('li');
+                li.textContent = `${month}: ${balance.toFixed(2)} €`;
+                monthlyBalances.appendChild(li);
+            }
+
+            document.querySelector('.container').classList.add('hidden');
+            balancePage.classList.remove('hidden');
+        });
+
+        // Torna a la pàgina principal
+        backToMain.addEventListener('click', () => {
+            balancePage.classList.add('hidden');
+            document.querySelector('.container').classList.remove('hidden');
         });
 
         // Inicialitza la interfície
